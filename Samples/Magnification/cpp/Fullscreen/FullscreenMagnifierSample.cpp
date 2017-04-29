@@ -227,8 +227,43 @@ void SetZoom(_In_ HWND hwndDlg, _In_ float magnificationFactor)
         // that the values returned from that function are unaffected by the current DPI setting. 
         // In order to ensure this, the manifest for this app declares the app to be DPI aware.
 
-        int xDlg = (int)((float)GetSystemMetrics(SM_CXSCREEN) * (1.0 - (1.0 / magnificationFactor)) / 2.0);
-        int yDlg = (int)((float)GetSystemMetrics(SM_CYSCREEN) * (1.0 - (1.0 / magnificationFactor)) / 2.0);
+		float ScreenX = (float)GetSystemMetrics(SM_CXSCREEN);
+		float ScreenY = (float)GetSystemMetrics(SM_CYSCREEN);
+		int xDlg; // = (int)(ScreenX * (1.0 - (1.0 / magnificationFactor)) / 2.0);
+		int yDlg; //  = (int)(ScreenY * (1.0 - (1.0 / magnificationFactor)) / 2.0);
+		float MagScreenX = ScreenX / magnificationFactor;
+		float MagScreenY = ScreenY / magnificationFactor;
+
+		POINT p;
+		if (GetCursorPos(&p))
+		{
+			/*
+			xDlg = (int)(p.x);
+			yDlg = (int)(p.y);
+			xDlg = (int)((float)xDlg * (2.0 - (2.0 / magnificationFactor)) / 2.0);
+			yDlg = (int)((float)yDlg * (2.0 - (2.0 / magnificationFactor)) / 2.0);
+			*/
+			xDlg = (int)((float)p.x - MagScreenX / 2.0);
+			yDlg = (int)((float)p.y - MagScreenY / 2.0);
+
+			if (xDlg > ScreenX - MagScreenX)
+				xDlg = ScreenX - MagScreenX;
+			else if (xDlg < 0)
+				xDlg = 0;
+
+			if (yDlg > ScreenY - MagScreenY)
+				yDlg = ScreenY - MagScreenY;
+			else if (yDlg < 0)
+				yDlg = 0;
+		}
+		else 
+		{
+			xDlg = (int)(ScreenX * (1.0 - (1.0 / magnificationFactor)) / 2.0);
+			yDlg = (int)(ScreenY * (1.0 - (1.0 / magnificationFactor)) / 2.0);
+		}
+
+		// int xDlg = (int)((float)GetSystemMetrics(SM_CXSCREEN) * (1.0 - (1.0 / magnificationFactor)) / 2.0);
+		// int yDlg = (int)((float)GetSystemMetrics(SM_CYSCREEN) * (1.0 - (1.0 / magnificationFactor)) / 2.0);
 
         BOOL fSuccess = MagSetFullscreenTransform(magnificationFactor, xDlg, yDlg);
         if (fSuccess)
