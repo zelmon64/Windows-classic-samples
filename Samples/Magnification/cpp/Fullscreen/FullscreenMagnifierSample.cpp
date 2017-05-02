@@ -39,12 +39,31 @@ MAGCOLOREFFECT g_MagEffectGrayscale = {0.3f,  0.3f,  0.3f,  0.0f,  0.0f,
                                        0.0f,  0.0f,  0.0f,  1.0f,  0.0f,
                                        0.0f,  0.0f,  0.0f,  0.0f,  1.0f};
 
+/*
+MAGCOLOREFFECT magEffectInvert =
+{{ // MagEffectInvert
+{ -1.0f,  0.0f,  0.0f,  0.0f,  0.0f },
+{  0.0f, -1.0f,  0.0f,  0.0f,  0.0f },
+{  0.0f,  0.0f, -1.0f,  0.0f,  0.0f },
+{  0.0f,  0.0f,  0.0f,  1.0f,  0.0f },
+{  1.0f,  1.0f,  1.0f,  0.0f,  1.0f }
+}};
+
+ret = MagSetColorEffect(hwndMag,&magEffectInvert);
+*/
+MAGCOLOREFFECT g_MagEffectInvert = {-1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+                                        0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+                                        0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+                                        0.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+                                        1.0f,  1.0f,  1.0f,  0.0f,  1.0f};
+
 // Forward declarations.
 INT_PTR CALLBACK SampleDialogProc(_In_ HWND hwndDlg, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
 void InitDlg(_In_ HWND hwndDlg);
 void HandleCommand(_In_ HWND hwndDlg, _In_ WORD wCtrlId);
 void SetZoom(_In_ HWND hwndDlg, _In_ float fZoomFactor);
 void SetColorGrayscaleState(_In_ BOOL fGrayscaleOn);
+void SetColorInvertState(_In_ BOOL fInvertOn);
 void SetInputTransform(_In_ HWND hwndDlg, _In_ BOOL fSetInputTransform);
 void GetSettings(_In_ HWND hwndDlg);
 
@@ -179,6 +198,15 @@ void HandleCommand(_In_ HWND hwndDlg, _In_ WORD wCtrlId)
 
         break;
     }
+	case IDC_CHECK_SETINVERT:
+	{
+		// The user clicked the checkbox to invert the colors on the screen.
+		bool fInvertOn = (BST_CHECKED == SendDlgItemMessage(hwndDlg, IDC_CHECK_SETINVERT, BM_GETCHECK, 0, 0));
+
+		SetColorInvertState(fInvertOn);
+
+		break;
+	}
     case IDC_CHECK_SETINPUTTRANSFORM:
     {
         // The user clicked the checkbox to apply an input transform for touch and pen input.
@@ -278,7 +306,7 @@ void SetZoom(_In_ HWND hwndDlg, _In_ float magnificationFactor)
             {
                 if (fInputTransformEnabled)
                 {
-                    SetInputTransform(hwndDlg, fInputTransformEnabled);
+                    // SetInputTransform(hwndDlg, fInputTransformEnabled);
                 }                
             }
         }
@@ -292,10 +320,23 @@ void SetZoom(_In_ HWND hwndDlg, _In_ float magnificationFactor)
 //
 void SetColorGrayscaleState(_In_ BOOL fGrayscaleOn)
 {
-    // Apply the color matrix required to either invert the screen colors or to show the regular colors.
+    // Apply the color matrix required to either grayscale the screen colors or to show the regular colors.
     PMAGCOLOREFFECT pEffect = (fGrayscaleOn ? &g_MagEffectGrayscale : &g_MagEffectIdentity);
 
     MagSetFullscreenColorEffect(pEffect);
+}
+
+//
+// FUNCTION: SetColorInvertState()
+//
+// PURPOSE: Either apply invert to all colors on the screen, or restore the original colors.
+//
+void SetColorInvertState(_In_ BOOL fInvertOn)
+{
+	// Apply the color matrix required to either invert the screen colors or to show the regular colors.
+	PMAGCOLOREFFECT pEffect = (fInvertOn ? &g_MagEffectInvert : &g_MagEffectIdentity);
+
+	MagSetFullscreenColorEffect(pEffect);
 }
 
 //
